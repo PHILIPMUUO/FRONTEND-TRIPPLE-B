@@ -5,18 +5,18 @@ import { toast } from 'react-toastify';
 import './AdminPanel.css';
 
 const categories = [
-  { label: 'Nails Parlour', value: 'nails' },
-  { label: 'Beauty Shop', value: 'beauty' },
-  { label: 'Men Fashion', value: 'men' },
-  { label: 'Women Fashion', value: 'women' },
-  { label: 'Kids Fashion', value: 'kids' },
-  { label: 'Photo Studio', value: 'studio' },
+  { label: 'Nails Parlour', value: 'nailsProducts' },
+  { label: 'Beauty Shop', value: 'beautyProducts' },
+  { label: 'Men Fashion', value: 'menFashion' },
+  { label: 'Women Fashion', value: 'womenFashion' },
+  { label: 'Kids Fashion', value: 'kidsFashion' },
+  { label: 'Photo Studio', value: 'studioServices' },
 ];
 
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('nails');
+  const [selectedCategory, setSelectedCategory] = useState('nailsProducts');
   const [form, setForm] = useState({ name: '', price: '', image: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -48,8 +48,8 @@ const AdminPanel = () => {
       const res = await axios.post('http://localhost:5000/api/upload', formData);
       return `/uploads/${res.data.filename}`;
     } catch (err) {
-      toast.error("Image upload failed");
-      return null;
+      console.warn("Image upload failed, falling back to manual path");
+      return form.image;
     }
   };
 
@@ -57,7 +57,7 @@ const AdminPanel = () => {
     const imageUrl = await uploadImage();
 
     if (!imageUrl && !editingId) {
-      toast.warn("Upload an image");
+      toast.warn("Upload an image or enter a valid path");
       return;
     }
 
@@ -76,14 +76,16 @@ const AdminPanel = () => {
           );
           toast.success("Product updated");
           resetForm();
-        });
+        })
+        .catch(() => toast.error("Failed to update product"));
     } else {
       axios.post('http://localhost:5000/api/products', productData)
         .then(res => {
           setProducts(prev => [...prev, res.data]);
           toast.success("Product added");
           resetForm();
-        });
+        })
+        .catch(() => toast.error("Failed to add product"));
     }
   };
 
@@ -98,7 +100,8 @@ const AdminPanel = () => {
       .then(() => {
         setProducts(prev => prev.filter(p => p._id !== id));
         toast.success("Product deleted");
-      });
+      })
+      .catch(() => toast.error("Failed to delete"));
   };
 
   const handleEdit = (product) => {
@@ -157,7 +160,7 @@ const AdminPanel = () => {
           <button onClick={resetForm}>Clear</button>
         </div>
 
-        {/* Table */}
+        {/* Product Table */}
         <table className="product-table">
           <thead>
             <tr>
