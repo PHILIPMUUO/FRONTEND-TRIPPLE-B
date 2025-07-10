@@ -15,7 +15,7 @@ function App() {
   const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+fetch("https://backend-trippleb.onrender.com/api/...")
       .then((res) => res.json())
       .then((data) => setAllProducts(data))
       .catch((err) => console.error('Failed to fetch products:', err));
